@@ -5,21 +5,24 @@ const mongoose = require('mongoose');
 const morgan = require('morgan');
 const conn_url = "mongodb+srv://sahanatk:desu786@nodecluster-11d3n.mongodb.net/test?retryWrites=true&w=majority";
 const prodModel = require('./App/Models/prodmodel');
-
+const cors = require('cors');
+mongoose.Promise = global.Promise;
 var app = express();
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.listen(3000, () => {
+app.listen(4000, () => {
     mongoose.connect(conn_url, { useNewUrlParser: true,useUnifiedTopology: true}, (error,client) => {
             if(error) {
                 throw error;
             }
-           // console.log("connected to" + db_name);
+            console.log("connected to mongoose");
     });
 });
 //create product
 app.post('/product/create', (req,res,next) => {
+    console.log("Post call received");
     const receivedProd = req.body.product;
     const prod = new prodModel({
         _id: new mongoose.Types.ObjectId(),
@@ -45,6 +48,7 @@ app.post('/product/create', (req,res,next) => {
 });
 //gets product
 app.get("/product/get/",(req,res,next) => {
+    console.log("Get call received");
     prodModel.find().exec()
     .then(doc => {
         console.log("From database", doc);
@@ -57,6 +61,7 @@ app.get("/product/get/",(req,res,next) => {
 });
 //delete product
 app.delete("/product/delete/:id",(req,res,next) => {
+    console.log("Delete call received");
     const Id = req.params.id;
     prodModel.remove({ _id: Id })
     .exec()
@@ -70,13 +75,15 @@ app.delete("/product/delete/:id",(req,res,next) => {
 });
 //update product
 app.patch("/product/update/:id", (req,res,next) => {
-    const receivedProd = req.body.product;
-    const id = req.params.id;
+    console.log("Patch call received");
+    const receivedProd = req.body;
     const updateOper = {};
     for (const ops of receivedProd) {
+        console.log(ops.propName);
+        console.log(ops.value);
         updateOper[ops.propName] = ops.value;
     }
-    prodModel.update({ _id : id }, { $set: updateOper })
+    prodModel.findByIdAndUpdate(req.params.id, {product: { $set: updateOper }}, {new: true})
     .exec()
     .then(result => {
         console.log(result);

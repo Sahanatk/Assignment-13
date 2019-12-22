@@ -1,65 +1,54 @@
 import React, { Component } from 'react'
-// import { json } from 'body-parser'
-// import { response } from 'express'
-
-const RESET_VALUES ={
-                        id: '',
-                        product:{
-                                productid:'0',
-                                category: '', 
-                                price: '',
-                                name: '',
-                                instock:''
-                                }
-                    };
+import Axios from 'axios';
+//import { json } from 'body-parser';
 
 class ProductForm extends Component {
     constructor(props) {
-        super(props)
-        this.handleChange = this.handleChange.bind(this)
-        this.handleSave = this.handleSave.bind(this)
+        super(props);
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSave = this.handleSave.bind(this);
         this.state = {
-            product: Object.assign({}, RESET_VALUES),
-            errors: {}
-        }
+                productid:'',
+                category: '', 
+                price: '',
+                name: '',
+                instock:'' 
+            }
     }
-        
-    handleChange(e) {
+    handleChange(e){
         const target = e.target
         const value = target.value
         const name = target.name
-    
         this.setState((prevState) => {
             prevState.product[name] = value
-            return { product: prevState.product }
+            return { product : prevState.product }
         })
     }
-
     handleSave(e) {
-        fetch('http://localhost/3000/product/create/', {
-            method:'post',
-            headers: {
-                'Content-Type':'application/json',
-            },
-            body:JSON.stringify({
-                id:this.RESET_VALUES.id++,
-                productid:this.RESET_VALUES.productid,
-                category:this.RESET_VALUES.category,
-                price:this.RESET_VALUES.price,
-                name:this.RESET_VALUES.name,
-                instock:this.RESET_VALUES.instock
-            })
-        })
-        .then(res => res.json())
-        .catch(err => console.log(err))
-        this.props.onSave(this.state.product);
-        // reset the form values to blank after submitting
-        this.setState({
-            product: Object.assign({}, RESET_VALUES), 
-            errors: {}
-        })
+        console.log("Handling save")
         // prevent the form submit event from triggering an HTTP Post
-        e.preventDefault()
+        e.preventDefault();
+        const obj = {
+            product: {
+                productid:this.state.productid,
+                category:this.state.category,
+                price:this.state.price,
+                name:this.state.name,
+                instock:this.state.instock
+            }
+        };
+        //const axios = require('axios');
+        Axios.post('http://localhost:4000/product/create',obj)
+        .then(res => console.log(res.data));
+        this.setState({
+            product:{
+                productid:'',
+                category: '', 
+                price: '',
+                name: '',
+                instock:''
+            }
+        })
     }
 
     render () {
@@ -68,26 +57,29 @@ class ProductForm extends Component {
                 <h4>Add a new product</h4>
                 <p>
                     <label>Product Id <br /> 
-                    <input type="text" class="form-control" name="name" onChange={this.handleChange} value={this.state.product.productid} /></label>
+                    <input type="text" class="form-control" name="productid" onChange={this.handleChange} value={this.state.productid} /></label>
+                </p>
+             
+                <p>
+                    <label>Category <br /> 
+                    <input type="text" class="form-control" name="category" onChange={this.handleChange} value={this.state.category} /></label>
+                </p>
+              
+                <p>
+                    <label>Price <br /> 
+                    <input type="text" class="form-control" name="price" onChange={this.handleChange} value={this.state.price} /></label>
                 </p>
                 <p>
                     <label>Name <br /> 
-                    <input type="text" class="form-control" name="name" onChange={this.handleChange} value={this.state.product.name} /></label>
-                </p>
-                <p>
-                    <label>Category <br /> 
-                    <input type="text" class="form-control" name="category" onChange={this.handleChange} value={this.state.product.category} /></label>
-                </p>
-                <p>
-                    <label>Price <br /> 
-                    <input type="text" class="form-control" name="price" onChange={this.handleChange} value={this.state.product.price} /></label>
+                    <input type="text" class="form-control" name="name" onChange={this.handleChange} value={this.state.name} /></label>
                 </p>
                 <p>
                     <label>In Stock <br /> 
-                    <input type="text" class="form-control" name="category" onChange={this.handleChange} value={this.state.product.instock} /></label>
+                    <input type="text" class="form-control" name="instock" onChange={this.handleChange} value={this.state.instock} /></label>
                 </p>
                 <input type="submit" class="btn btn-info" value="Save" onClick={this.handleSave}></input>
             </form>
+           
         )
     }
 }
